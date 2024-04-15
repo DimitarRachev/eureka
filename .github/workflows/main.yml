@@ -15,7 +15,9 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
 
       - name: connect, pull and build
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && export JAVA_HOME=${{ secrets.JAVA_HOME }} && bash gradlew clean build"
-      
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && export JAVA_HOME=${{ secrets.JAVA_HOME }} && bash gradlew clean build && docker kill ${{ secrets.CONTAINER_NAME }} && docker rm ${{ secrets.CONTAINER_NAME }}"
+
+      - name: connect, remove old image and deploy new
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && echo "FROM openjdk:21-ea-30-slim-bookworm" > Dockerfile && echo "COPY build/libs/eureka-*-SNAPSHOT.jar app.jar" >> Dockerfile && echo "ENTRYPOINT ["java", "-jar","${{ secrets.APP_PORT }}", "/app.jar"]" >> Dockerfile && docker build -t ${{ secrets.CONTAINER_NAME }} . && docker run -p ${{ secrets.DOCKER_PORTMAPING }} ${{ secrets.CONTAINER_NAME }} -d && rm Dockerfile"
       - name: cleanup
         run: rm -rf ~/.shh
