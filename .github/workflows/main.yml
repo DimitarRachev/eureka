@@ -14,10 +14,10 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa 
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
 
-      - name: connect, pull and build
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && export JAVA_HOME=${{ secrets.JAVA_HOME }} && bash gradlew clean build && docker kill ${{ secrets.CONTAINER_NAME }} && docker rm ${{ secrets.CONTAINER_NAME }}"
+      - name: connect, pull, build and remove old image
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && export JAVA_HOME=${{ secrets.JAVA_HOME }} && bash gradlew clean build && bash src/main/resources/scripts/cleanContainer.sh"
 
-      - name: connect, remove old image and deploy new
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && echo FROM openjdk:21-ea-30-slim-bookworm > Dockerfile && echo COPY build/libs/eureka-*-SNAPSHOT.jar app.jar >> Dockerfile && echo ENTRYPOINT ['"java"', '"-jar"','"${{ secrets.APP_PORT }}"', '"/app.jar"'] >> Dockerfile && cat Dockerfile && docker build -t ${{ secrets.CONTAINER_NAME }} . && docker run -p ${{ secrets.DOCKER_PORTMAPPING }} --name ${{ secrets.CONTAINER_NAME }} -d ${{ secrets.CONTAINER_NAME }}  && rm Dockerfile"
+      - name: connect, deploy and cleanup
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && bash src/main/resources/scripts/createAndStart.sh ${{ secrets.APP_PORT }} ${{ secrets.CONTAINER_NAME }}"
       - name: cleanup
         run: rm -rf ~/.shh
