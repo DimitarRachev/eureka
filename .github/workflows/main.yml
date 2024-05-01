@@ -15,7 +15,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
 
       - name: connect, pull, build and remove old image
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && export JAVA_HOME=${{ secrets.JAVA_HOME }} && bash gradlew clean build && bash src/main/resources/scripts/cleanContainer.sh"
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && export JAVA_HOME=${{ secrets.JAVA_HOME }} && bash gradlew clean build && bash src/main/resources/scripts/cleanContainer.sh ${{ secrets.CONTAINER_NAME }}"
 
       - name: connect, deploy and cleanup
         run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && bash src/main/resources/scripts/createAndStart.sh ${{ secrets.APP_PORT }} ${{ secrets.CONTAINER_NAME }}"

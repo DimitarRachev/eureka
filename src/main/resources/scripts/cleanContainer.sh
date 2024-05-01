@@ -2,7 +2,7 @@
 
 # Check if container name is provided as argument
 if [ $# -ne 1 ]; then
-    echo "Usage: $0 <port> <container_name>"
+    echo "Usage: $0 <containerca_name>"
     exit 1
 fi
 
