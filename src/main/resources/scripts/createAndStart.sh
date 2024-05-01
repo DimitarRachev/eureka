@@ -17,7 +17,7 @@ dockerfile_content="FROM openjdk:21-ea-30-slim-bookworm\n\nCOPY build/libs/eurek
 echo -e "$dockerfile_content" > Dockerfile
 
 # Generate docker-compose.yml content
-docker_compose_content="services:\n  $container_name:\n    container_name: $container_name\n    build:\n      context: .\n      dockerfile: Dockerfile\n    environment:\n      serverPort: $port\n    ports:\n      - \"$port:$port\""
+docker_compose_content="services:\n  $container_name:\n    container_name: $container_name\n    build:\n      context: .\n      dockerfile: Dockerfile\n    environment:\n      serverPort: $port\n    ports:\n      - $port:$port"
 
 # Write docker-compose.yml
 echo -e "$docker_compose_content" > docker-compose.yml
